@@ -40,11 +40,11 @@ jobs:
           paths:
             - node_modules
 
-      # - store_test_results:
-      #     path: test-results
+      - store_test_results:
+          path: test-results
 
-      # - store_artifacts:
-      #     path: test-results
+      - store_artifacts:
+          path: test-results
 
   android:
     working_directory: ~/demo-react-native/android
@@ -113,11 +113,11 @@ jobs:
       #       bundle exec fastlane test
       #       mv fastlane/report.xml test-results/fastlane
 
-      # - store_test_results:
-      #     path: test-results
+      - store_test_results:
+          path: test-results
 
-      # - store_artifacts:
-      #     path: test-results
+      - store_artifacts:
+          path: test-results
 
   test:
     working_directory: ~/demo-react-native/test-project
