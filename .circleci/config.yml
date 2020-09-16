@@ -1,0 +1,154 @@
+version: 2.1
+orbs:
+  node: circleci/node@4.0.0
+
+jobs:
+
+  node:
+    working_directory: ~/demo-react-native
+    docker:
+      - image: circleci/node:14.8.0
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: yarn-v1-{{ checksum "yarn.lock" }}-{{ arch }}
+
+      - restore_cache:
+          key: node-v1-{{ checksum "package.json" }}-{{ arch }}
+
+      - save_cache:
+          key: yarn-v1-{{ checksum "yarn.lock" }}-{{ arch }}
+          paths:
+            - ~/.cache/yarn
+
+      - save_cache:
+          key: node-v1-{{ checksum "package.json" }}-{{ arch }}
+          paths:
+            - node_modules
+
+      # - run:
+      #     name: jest tests
+      #     command: |
+      #       mkdir -p test-results/jest
+      #       yarn run test
+      #     environment:
+      #       JEST_JUNIT_OUTPUT: test-results/jest/junit.xml
+
+      - persist_to_workspace:
+          root: ~/demo-react-native
+          paths:
+            - node_modules
+
+      # - store_test_results:
+      #     path: test-results
+
+      # - store_artifacts:
+      #     path: test-results
+
+  android:
+    working_directory: ~/demo-react-native/android
+    docker:
+      - image: circleci/android:api-29
+    steps:
+      - checkout:
+          path: ~/demo-react-native
+
+      - attach_workspace:
+          at: ~/demo-react-native
+
+      - node/install:
+          install-yarn: true
+
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - run:
+          name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
+          command: sudo chmod +x ./gradlew
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+
+      # Build Apk and Upload to Browserstack then test
+      - run: 
+          name: Build Apk
+          command: ./gradlew assembleDebug
+
+      - run:
+          name : App upload and Set app id in environment variable.
+          command : |
+            APP_UPLOAD_RESPONSE=$(curl -u "johncarlodeleon1:EPnWvRvF8sxcKEC9xpat" -X POST https://api-cloud.browserstack.com/app-automate/upload -F "file=@app/build/outputs/apk/debug/app-debug.apk")
+            APP_ID=$(echo $APP_UPLOAD_RESPONSE | jq -r ".app_url")
+            if [ $APP_ID != null ]; then
+              echo "Apk uploaded to BrowserStack with app id : ",$APP_ID;
+              echo "export BROWSERSTACK_APP_ID=$APP_ID" >> $BASH_ENV;
+              source $BASH_ENV;
+              echo "Setting value of BROWSERSTACK_APP_ID in environment variables to  ",$APP_ID;
+            else
+              UPLOAD_ERROR_MESSAGE=$(echo $APP_UPLOAD_RESPONSE | jq -r ".error")
+              echo "App upload failed, reason : ",$UPLOAD_ERROR_MESSAGE
+              exit 1;
+            fi
+
+      - run: ./gradlew test   
+
+      # - restore_cache:
+      #     key: bundle-v1-{{ checksum "Gemfile.lock" }}-{{ arch }}
+
+      # - run: bundle install
+
+      # - save_cache:
+      #     key: bundle-v1-{{ checksum "Gemfile.lock" }}-{{ arch }}
+      #     paths:
+      #       - vendor/bundle
+
+      # - run:
+      #     name: fastlane tests
+      #     command: |
+      #       mkdir -p test-results/fastlane
+      #       bundle exec fastlane test
+      #       mv fastlane/report.xml test-results/fastlane
+
+      # - store_test_results:
+      #     path: test-results
+
+      # - store_artifacts:
+      #     path: test-results
+
+  test:
+    working_directory: ~/demo-react-native/test-project
+
+    steps:
+
+      - restore_cache:
+          key: node-v1-{{ checksum "package.json" }}-{{ arch }}
+
+      - run: npm install --save webdriverio @wdio/cli
+
+      - run: npm install --save chai
+
+      - save_cache:
+          key: node-v1-{{ checksum "package.json" }}-{{ arch }}
+          paths:
+            - node_modules
+
+      # - run: npx wdio ./wdio.conf.js
+
+      - run: npm run single
+
+
+workflows:
+  version: 2.1
+  node-android-ios:
+    jobs:
+      - node
+      - android:
+          requires:
+            - node
+      - test:
+          requires:
+            - android
