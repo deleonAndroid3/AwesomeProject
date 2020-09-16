@@ -121,7 +121,8 @@ jobs:
 
   test:
     working_directory: ~/demo-react-native/test-project
-
+    docker:
+      - image: circleci/android:api-29
     steps:
 
       - restore_cache:
@@ -143,7 +144,7 @@ jobs:
 
 workflows:
   version: 2.1
-  node-android-ios:
+  node-android:
     jobs:
       - node
       - android:
