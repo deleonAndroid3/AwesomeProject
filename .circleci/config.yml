@@ -146,7 +146,7 @@ jobs:
 
       # - run: npx wdio ./wdio.conf.js
 
-      - run: npm run single
+      - run: npm run test
 
 
 workflows:
