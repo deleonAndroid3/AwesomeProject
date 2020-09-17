@@ -16,6 +16,14 @@ exports.config = {
       'browserstack.debug': true,
     },
   ],
+  services: [
+    [
+      'browserstack',
+      {
+        browserstackLocal: true,
+      },
+    ],
+  ],
 
   logLevel: 'verbose',
   coloredLogs: true,
