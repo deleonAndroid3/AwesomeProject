@@ -1,9 +1,9 @@
 exports.config = {
-  user: process.env.BROWSERSTACK_USERNAME || 'BROWSERSTACK_USERNAME',
-  key: process.env.BROWSERSTACK_ACCESS_KEY || 'BROWSERSTACK_ACC_KEY',
+  user: 'johncarlodeleon1',
+  key: 'EPnWvRvF8sxcKEC9xpat',
 
   updateJob: false,
-  specs: ['./tests/specs/single_test.js'],
+  specs: ['./test/specs/*.js'],
   exclude: [],
 
   capabilities: [
