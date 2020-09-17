@@ -35,16 +35,16 @@ jobs:
       #     environment:
       #       JEST_JUNIT_OUTPUT: test-results/jest/junit.xml
 
-      # - persist_to_workspace:
-      #     root: ~/demo-react-native
-      #     paths:
-      #       - node_modules
+      - persist_to_workspace:
+          root: ~/demo-react-native
+          paths:
+            - node_modules
 
-      # - store_test_results:
-      #     path: test-results
+      - store_test_results:
+          path: test-results
 
-      # - store_artifacts:
-      #     path: test-results
+      - store_artifacts:
+          path: test-results
 
   android:
     working_directory: ~/demo-react-native/android
@@ -113,18 +113,6 @@ jobs:
       #       bundle exec fastlane test
       #       mv fastlane/report.xml test-results/fastlane
 
-      # - store_test_results:
-      #     path: test-results
-
-      # - store_artifacts:
-      #     path: test-results
-
-  test:
-    working_directory: ~/demo-react-native/test-project
-    docker:
-      - image: circleci/android:api-29
-    steps:
-
       - restore_cache:
           key: node-v1-{{ checksum "package.json" }}-{{ arch }}
 
@@ -141,6 +129,34 @@ jobs:
 
       - run: npm run single
 
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
+
+  # test:
+  #   working_directory: ~/demo-react-native/test-project
+  #   docker:
+  #     - image: circleci/android:api-29
+  #   steps:
+
+  #     - restore_cache:
+  #         key: node-v1-{{ checksum "package.json" }}-{{ arch }}
+
+  #     - run: npm install --save webdriverio @wdio/cli
+
+  #     - run: npm install --save chai
+
+  #     - save_cache:
+  #         key: node-v1-{{ checksum "package.json" }}-{{ arch }}
+  #         paths:
+  #           - node_modules
+
+  #     # - run: npx wdio ./wdio.conf.js
+
+  #     - run: npm run single
+
 
 workflows:
   version: 2.1
@@ -150,6 +166,6 @@ workflows:
       - android:
           requires:
             - node
-      - test:
-          requires:
-            - android
+      # - test:
+      #     requires:
+      #       - android
