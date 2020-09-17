@@ -97,6 +97,8 @@ jobs:
             fi
 
       - run: ./gradlew test   
+      
+      - run: npm run single
 
       # - restore_cache:
       #     key: bundle-v1-{{ checksum "Gemfile.lock" }}-{{ arch }}
@@ -141,7 +143,7 @@ jobs:
 
       # - run: npx wdio ./wdio.conf.js
 
-      - run: npm run single
+      - run: cd .. && npm run single
 
 
 workflows:
@@ -152,6 +154,6 @@ workflows:
       - android:
           requires:
             - node
-      - test:
-          requires:
-            - android
+      # - test:
+      #     requires:
+      #       - android
