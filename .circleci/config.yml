@@ -126,15 +126,18 @@ jobs:
     docker:
       - image: circleci/android:api-29
     steps:
+
+      - restore_cache:
+          key: node-v1-{{ checksum "package.json" }}-{{ arch }}
+
       - node/install:
           install-yarn: true
+
+      - run: npm init -y
 
       - run: npm install --save webdriverio @wdio/cli
 
       - run: npm install --save chai
-
-      - restore_cache:
-          key: node-v1-{{ checksum "package.json" }}-{{ arch }}
 
       - save_cache:
           key: node-v1-{{ checksum "package.json" }}-{{ arch }}
