@@ -11,15 +11,13 @@ jobs:
     steps:
       - checkout
 
-      - node/install:
-          install-yarn: true
-          install-npm: false
-
       - restore_cache:
           key: yarn-v1-{{ checksum "yarn.lock" }}-{{ arch }}
 
       - restore_cache:
           key: node-v1-{{ checksum "package.json" }}-{{ arch }}
+
+      # - run: npm install
 
       - save_cache:
           key: yarn-v1-{{ checksum "yarn.lock" }}-{{ arch }}
@@ -60,6 +58,9 @@ jobs:
 
       - attach_workspace:
           at: ~/demo-react-native
+
+      # - node/install:
+      #     install-yarn: true
 
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
@@ -126,9 +127,9 @@ jobs:
       - image: circleci/android:api-29
     steps:
 
-      - run: npm install --save webdriverio @wdio/cli
+      # - run: npm install --save webdriverio @wdio/cli
 
-      - run: npm install --save chai
+      # - run: npm install --save chai
 
       - restore_cache:
           key: node-v1-{{ checksum "package.json" }}-{{ arch }}
