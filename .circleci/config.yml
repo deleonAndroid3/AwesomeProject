@@ -154,6 +154,6 @@ workflows:
       - android:
           requires:
             - node
-      # - test:
-      #     requires:
-      #       - android
+      - test:
+          requires:
+            - android
